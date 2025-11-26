@@ -2,18 +2,18 @@
 # -*- coding: utf-8 -*-
 """
 compare_groups_qe.py
-Pipeline local para comparar calidad de traducción entre grupos (official, fansub, ai)
-Entrada por defecto:
- - /mnt/data/metrics_wide_strict_allmetrics.csv  (archivo wide ya creado)
-Si no existe, el script intentará cargar /mnt/data/metrics_all_groups.csv y pivotar a wide.
-Salida por defecto:
- - ./qe_compare_outputs/ (CSV, plots, report HTML)
+Local pipeline to compare translation quality between groups (official, fansub, ai)
+Default input:
+ - .\data\metrics_wide_strict_allmetrics.csv  (wide file already created)
+If not present, the script will attempt to load .\data\metrics_all_groups.csv and pivot to wide.
+Default output:
+ - .\qe_compare_outputs\ (CSVs, plots, HTML report)
 
-Dependencias:
+Dependencies:
 pip install pandas numpy scipy statsmodels matplotlib seaborn jinja2
 
-Uso:
-python compare_groups_qe.py --input /mnt/data/metrics_wide_strict_allmetrics.csv
+Usage:
+python compare_groups_qe.py --input .\data\metrics_wide_strict_allmetrics.csv
 """
 import os
 import sys
@@ -32,9 +32,9 @@ import seaborn as sns
 from jinja2 import Template
 
 # ---------------- CONFIG DEFAULTS ----------------
-DEFAULT_WIDE = r"C:\Users\Marcos\Desktop\2025-2\Tesis_Samir\qe_outputs\metrics_wide_strict_allmetrics.csv"
-FALLBACK_RAW = r"C:\Users\Marcos\Desktop\2025-2\Tesis_Samir\qe_outputs\metrics_all_groups.csv"
-OUT_ROOT = r"C:\Users\Marcos\Desktop\2025-2\Tesis_Samir\qe_outputs\qe_compare_outputs"
+DEFAULT_WIDE = ".\qe_outputs\metrics_wide_strict_allmetrics.csv"
+FALLBACK_RAW = ".\qe_outputs\metrics_all_groups.csv"
+OUT_ROOT = ".\qe_outputs\qe_compare_outputs"
 ALPHA = 0.05
 
 # default metrics to analyze (must match column base names in the wide file)
@@ -186,7 +186,7 @@ def paired_test_and_effect(x, y, alpha=ALPHA):
             # approximate z from w: use normal approximation: z = (w - n(n+1)/4)/sqrt(n(n+1)(2n+1)/24)
             n_ = n
             mean_w = n_*(n_+1)/4.0
-            sd_w = math.sqrt(n_*(n_+1)*(2*n_+1)/24.0)
+            sd_w = math.sqrt(n_*(n_1)*(2*n_+1)/24.0) if False else math.sqrt(n_*(n_+1)*(2*n_+1)/24.0)  # kept safe
             z = (w_stat - mean_w) / sd_w if sd_w>0 else 0.0
             r = abs(z) / math.sqrt(n_) if n_>0 else np.nan
             res.update({"test":"wilcoxon","stat": float(w_stat), "pvalue": float(p_val), "effect_size": float(r), "method":"wilcoxon (r)"})
