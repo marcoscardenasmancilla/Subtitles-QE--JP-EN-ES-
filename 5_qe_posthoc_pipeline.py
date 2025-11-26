@@ -26,11 +26,11 @@ except Exception:
     HAS_SEABORN = False
 
 # ------------------ Defaults & paths ------------------
-PAIRWISE_FP_DEFAULT = r"C:\Users\Marcos\Desktop\2025-2\Tesis_Samir\qe_outputs\qe_compare_outputs\stats\pairwise_tests_20251120T220239Z.csv"
-DESCRIPTIVES_FP_DEFAULT = r"C:\Users\Marcos\Desktop\2025-2\Tesis_Samir\qe_outputs\qe_compare_outputs\stats\descriptives_20251120T220239Z.csv"
-WIDE_FP_DEFAULT = r"C:\Users\Marcos\Desktop\2025-2\Tesis_Samir\qe_outputs\metrics_wide_strict_allmetrics.csv"
+PAIRWISE_FP_DEFAULT = ".\qe_outputs\qe_compare_outputs\stats\pairwise_tests.csv"
+DESCRIPTIVES_FP_DEFAULT = ".\qe_outputs\qe_compare_outputs\stats\descriptives.csv"
+WIDE_FP_DEFAULT = ".\qe_outputs\metrics_wide_strict_allmetrics.csv"
 
-OUT_DIR = Path(r"C:\Users\Marcos\Desktop\2025-2\Tesis_Samir\qe_outputs\qe_posthoc_outputs")
+OUT_DIR = Path(".\qe_outputs\qe_posthoc_outputs")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Default metrics to process (the four normalized metrics you asked)
@@ -338,3 +338,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
