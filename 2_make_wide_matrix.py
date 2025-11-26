@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 """
 make_wide_matrix.py
-Genera matrices 'wide' por time_stamp con columnas <metric>__<group>
-Salida por defecto en /mnt/data/
+Generates 'wide' matrices by time_stamp with columns <metric>__<group>
+Default output in /mnt/data/
  - metrics_wide_by_timestamp.csv
  - metrics_wide_valid_minonepergroup.csv
  - metrics_wide_strict_allmetrics.csv
 
-Uso:
- python make_wide_matrix.py --input /mnt/data/metrics_all_groups.csv
+Usage:
+ python make_wide_matrix.py --input .\metrics_all_groups.csv
 
-Dependencias:
+Dependencies:
  pip install pandas numpy
 """
 
@@ -21,10 +21,10 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-DEFAULT_INPUT = r"C:\Users\Marcos\Desktop\2025-2\Tesis_Samir\qe_outputs\metrics_all_groups.csv"
-OUT_DIR = r"C:\Users\Marcos\Desktop\2025-2\Tesis_Samir\qe_outputs"
+DEFAULT_INPUT = ".\qe_outputs\metrics_all_groups.csv"
+OUT_DIR = ".\qe_outputs"
 
-# Lista por defecto de métricas que queremos pivotar (ajústala si hace falta)
+# Default list of metrics to pivot (adjust if necessary)
 DEFAULT_METRICS = [
     "sbert_jap_en","sbert_jap_sp",
     "comet_jap_en","comet_jap_sp",
@@ -33,7 +33,7 @@ DEFAULT_METRICS = [
 ]
 
 def robust_read_csv(fp):
-    """Lee CSV con engine 'python' y on_bad_lines='warn' para tolerar filas problemáticas."""
+    """Read CSV using engine 'python' and on_bad_lines='warn' to tolerate problematic rows."""
     print(f"[INFO] Leyendo archivo: {fp}")
     df = pd.read_csv(fp, engine="python", on_bad_lines="warn", encoding="utf-8")
     print(f"[INFO] Shape leída: {df.shape}")
@@ -41,10 +41,10 @@ def robust_read_csv(fp):
 
 def detect_time_and_group(df):
     cols = df.columns.str.lower().tolist()
-    # candidatos comunes
+    # common candidates
     time_candidates = [c for c in df.columns if c.lower() in ("time_stamp","timestamp","time","timecode","ts")]
     group_candidates = [c for c in df.columns if c.lower() in ("group","group_type","variant","source","system","origin")]
-    # fallback heurístico
+    # heuristic fallback
     if not time_candidates:
         time_candidates = [c for c in df.columns if "time" in c.lower() and "zone" not in c.lower()]
     if not group_candidates:
@@ -58,9 +58,9 @@ def detect_time_and_group(df):
 
 def find_metric_columns(df, desired_metrics):
     """
-    Mapea cada desired_metrics a la columna real del df.
-    Si existe exacta, la usa; si no, busca coincidencia por tokens (relajada).
-    Retorna dict: desired_metric -> actual_column_name (o None).
+    Map each desired_metric to the actual column in the df.
+    If an exact match exists, use it; otherwise look for token matches (relaxed).
+    Returns dict: desired_metric -> actual_column_name (or None).
     """
     cols = df.columns.tolist()
     mapping = {}
@@ -68,23 +68,23 @@ def find_metric_columns(df, desired_metrics):
         if desired in cols:
             mapping[desired] = desired
             continue
-        # tokens: descomponer
+        # tokens: decompose
         tokens = [t for t in desired.split("_") if t]
-        # primera búsqueda: todos los tokens aparecen (strict)
+        # first search: all tokens appear (strict)
         candidates = [c for c in cols if all(tok in c.lower() for tok in tokens)]
         if candidates:
             mapping[desired] = candidates[0]
             continue
-        # segunda búsqueda: al menos un token coincide (loose)
+        # second search: at least one token matches (loose)
         candidates2 = [c for c in cols if any(tok in c.lower() for tok in tokens)]
         mapping[desired] = candidates2[0] if candidates2 else None
     return mapping
 
 def pivot_to_wide(df, time_col, group_col, metric_map):
     """
-    Genera el dataframe 'wide' concatenando pivots por cada métrica m:
+    Generate the 'wide' dataframe by concatenating pivots for each metric m:
       pivot: index=time_col, columns=group_col, values=m
-    Columnas resultantes: <metric_actual>__<group>
+    Resulting columns: <metric_actual>__<group>
     """
     pivots = []
     used_metrics = []
@@ -99,7 +99,7 @@ def pivot_to_wide(df, time_col, group_col, metric_map):
         tmp = df[[time_col, group_col, actual_col]].copy()
         # pivot: index=time_col, columns=group, values=actual_col
         pivot = tmp.pivot(index=time_col, columns=group_col, values=actual_col)
-        # renombrar columnas: <actual_col>__<group>
+        # rename columns: <actual_col>__<group>
         pivot.columns = [f"{actual_col}__{g}" for g in pivot.columns]
         pivots.append(pivot)
         print(f"[INFO] Pivot creada para {actual_col}, columnas: {list(pivot.columns)[:5]}")
@@ -109,18 +109,18 @@ def pivot_to_wide(df, time_col, group_col, metric_map):
     wide = wide.reset_index().rename(columns={wide.index.name or 0: time_col})
     # rename index column to 'time_stamp' if necessary
     wide = wide.reset_index().rename(columns={"index": time_col})
-    # asegurar que exista columna 'time_stamp' con ese nombre explícito
+    # ensure that there is a 'time_stamp' column with that explicit name
     if time_col not in wide.columns:
-        # si el primer column es el time index, forzamos rename
+        # if the first column is the time index, force rename
         wide = wide.rename(columns={wide.columns[0]: time_col})
     return wide, used_metrics
 
 def subset_minone_per_group(wide, metrics_actual, groups):
     """
-    Conserva filas (time_stamp) donde, para cada grupo, exista al menos UNA métrica no-nula entre metrics_actual.
-    metrics_actual: lista de nombres de columnas *actuales* (no deseadas) que se usaron al pivotear.
+    Keep rows (time_stamp) where, for each group, there exists at least ONE non-null metric among metrics_actual.
+    metrics_actual: list of *actual* column names (not desired names) that were used when pivoting.
     """
-    # construir lista de columnas por metric x group
+    # build list of columns per metric x group
     # but we built columns as "<actual_metric>__<group>"
     mask_rows = []
     for idx, row in wide.iterrows():
@@ -140,7 +140,7 @@ def subset_minone_per_group(wide, metrics_actual, groups):
 
 def subset_strict_allmetrics(wide, metrics_actual, groups):
     """
-    Conserva filas donde *todas* las métricas (metrics_actual) estén presentes y no-nulas para cada grupo.
+    Keep rows where *all* metrics (metrics_actual) are present and non-null for each group.
     """
     required_cols = []
     for g in groups:
