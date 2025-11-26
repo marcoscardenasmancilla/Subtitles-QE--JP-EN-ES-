@@ -114,7 +114,7 @@ python 5_qe_posthoc_pipeline.py --pairwise path/to/pairwise.csv --descriptives p
 
 ---
 
-## Notes, known differences and recommendations
+## Notes:
 - **Group semantics**: The pipeline is set up to compare different *groups* (e.g., `official`, `fansub`, `ai`) as encoded in the `group` column. `4_compare_groups_qe.py`'s top comment already cites `official, fansub, ai`. Use the `group` column consistently.
 - **Normalization scope**: `qe_mix` normalization is performed per-group/frame in `1_sub_sbert_comet_pipeline.py` using `minmax_series()` on the group-level frame (batch-local). This means `qe_mix` values are relative within each processed group frame (not globally comparable across runs) unless you enforce a global normalization step after concatenating groups.
 - **COMET & SBERT availability**: Both models are optional (`SBERT_ENABLE`, `COMET_QE_ENABLE`); the scripts fallback to NaNs if models fail to load. Expect long first-run downloads for COMET.
