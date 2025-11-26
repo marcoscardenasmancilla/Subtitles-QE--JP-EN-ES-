@@ -3,7 +3,7 @@
 ---
 
 ## Summary
-A CPU-first, OOM-resilient set of small pipelines to compute sentence-level similarity and automatic quality-estimation signals for Japanese source subtitles vs English and Spanish translations, aggregate metrics by group, visualize distributions, run paired group comparisons, and generate post-hoc plots, tables and bootstrap CIs for statistically significant contrasts. The scripts expect a prepared CSV dataset with columns including `group`, `sub_jap`, `sub_trad_en` and `sub_trad_sp` (see `1_sub_sbert_comet_pipeline.py`).
+A CPU-first, OOM-resilient set of pipelines to compute sentence-level similarity and automatic quality-estimation signals for Japanese source subtitles vs English and Spanish translations, aggregate metrics by group, visualize distributions, run paired group comparisons, and generate post-hoc plots, tables and bootstrap CIs for statistically significant contrasts. The scripts expect a prepared CSV dataset with columns including `group`, `sub_jap`, `sub_trad_en` and `sub_trad_sp` (see `1_sub_sbert_comet_pipeline.py`).
 
 ---
 
